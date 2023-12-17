@@ -224,7 +224,6 @@ def train(model, dataloader, criterion, optimizer, device):
     total_loss = 0
     correct = 0  
 
-    # Loop through each batch in the dataloader
     for batch_idx, (data, target) in enumerate(dataloader):  
 
         data, target = data.to(device), target.to(device)  
@@ -232,30 +231,23 @@ def train(model, dataloader, criterion, optimizer, device):
         
         output = model(data) # Forward pass
         loss = criterion(output, target) 
-        
-        # Backward pass: compute the gradients of the loss with respect to the model parameters
         loss.backward() 
-        # Calculate and accumulate the loss for the current batch
         total_loss += loss.item()  
-        # Get the index of the highest predicted probability (predicted class)
         pred = output.argmax(dim=1, keepdim=True)  
-        # Update the model parameters using the optimizer
         optimizer.step() 
         scheduler.step()
-        # Count the number of correct predictions
-        correct += pred.eq(target.view_as(pred)).sum().item()  
+
+        correct += pred.eq(target.view_as(pred)).sum().item()  #number of correct prediction
         
         
-    # Calculate the average loss and accuracy for the entire dataset
     return total_loss / len(dataloader.dataset), correct / len(dataloader.dataset)
 
 if __name__ == '__main__':
     c = Compose(transforms)
 
-    #parameters 
     height_image, width_image = 144, 144
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Check for GPU availability
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
 
     leaf_dataset = LeafDataset()
     batch_size=64
@@ -280,19 +272,15 @@ if __name__ == '__main__':
 
     optimizer = optim.AdamW(model.parameters(), lr=3e-4)
     scheduler = OneCycleLR(optimizer, max_lr=3e-4, total_steps=int(((len(leaf_dataset) - 1) // batch_size + 1) * epochs))
-
-    # Create List to remember train losses 
+ 
     train_losses = []
 
-    # Training loop
-    for epoch in range(epochs):
-        # Call the `train` function to perform a single epoch of training
+
+    for epoch in range(epochs): #training loop
         train_loss, train_accuracy = train(model, train_loader, criterion, optimizer, device)
 
-        # Record train loss
         train_losses.append(round(train_loss, 3))
 
-        # Print the results for the current epoch
         print(f"Epoch {epoch+1}/{epochs}, Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}")
 
         # Save the model at the end of each epoch

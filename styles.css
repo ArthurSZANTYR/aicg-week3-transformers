@@ -16,7 +16,12 @@ body {
 
 #list_plants{
     font-size: medium;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+}  
+
+#technology{
+  font-size: medium;
+  margin-bottom: 30px;
 }  
 
 #image_view {
